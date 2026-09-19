@@ -1,6 +1,5 @@
 ﻿namespace Part1_ProceduralToOOP;
 
-// I use private set because we will toggle IsPaid 
 public class Order
 {
     private const int MaxOrders = 100;
@@ -20,7 +19,7 @@ public class Order
         Date = date;
         IsPaid = false;
     }
-
+    
     public static void CreateOrder(int orderId, int customerId, DateTimeOffset date)
     {
         if (Orders.Count >= MaxOrders)
@@ -35,14 +34,12 @@ public class Order
             return;
         }
         
-        // Not GPT, I was learned this pattern from Eng. Mohamed ElHellaly
+        //I was learned this pattern from Eng. Mohamed ElHellaly in API Course.
         if (Customer.FindCustomerById(customerId) is not { } customer)
         {
             Console.WriteLine($"ERROR: customer  {customerId} not found.");
             return;
         }
-        
-        //TODO: validate date here
         
         var order = new Order(orderId, customer, date);
         customer.Orders.Add(order); 
@@ -124,11 +121,86 @@ public class Order
                 $"{total,10:F2}");
         }
     }
+
+    public static void PrintOrders()
+    {
+        if (Orders.Count == 0)
+        {
+            Console.WriteLine("ERROR: No orders found.");    
+            return;
+        }
+
+        Console.WriteLine($"=== ALL ORDERS {Orders.Count} ===");
+        foreach (var order in Orders)
+        {
+            PrintOrder(order.Id);
+        }
+    }
+
+    public static void MarkOrderAsPaid(int orderId)
+    {
+        if (FindOrderById(orderId) is not { } order)
+        {
+            Console.WriteLine($"ERROR: order {orderId} not found.");
+            return;
+        }
+
+        if (order.IsPaid)
+        {
+            Console.WriteLine("ERROR: order is paid, so we can't change it.");
+            return;
+        }
+        
+        order.IsPaid = !order.IsPaid;
+        Console.WriteLine($"Order (#{orderId}) payment status: {order.IsPaid}");
+    }
+
+    public static void TotalSalesPaidOnly()
+    {
+        if (Orders.Count == 0)
+        {
+            Console.WriteLine("ERROR: No orders found.");
+            return;
+        }
+        
+        decimal total = 0m;
+        foreach (var order in Orders)
+        {
+            if (order.IsPaid)
+                total += CalculateOrderTotal(order.Id);
+        }
+
+        Console.WriteLine($"Total sales paid: {total}");
+    }
     
-    
-    public static int FindOrderIndexById(int orderId)
+    private static int FindOrderIndexById(int orderId)
         => Orders.FindIndex(order => order.Id == orderId);
     
-    public static Order? FindOrderById(int orderId)
+    private static Order? FindOrderById(int orderId)
         => Orders.Find(order => order.Id == orderId);
+    
+    private static decimal CalculateOrderTotal(int orderId)
+    {
+        if (FindOrderById(orderId) is not { } order)
+        {
+            Console.WriteLine($"ERROR: order {orderId} not found.");
+            return 0;
+        }
+        
+        // order -> orderLine -> Product.Price * orderLine.quantity = total
+        // order -> customer -> If Customer.IsVip, then total *= 0.90
+
+        decimal total = 0m;
+        foreach (var line in order.OrderLines)
+        {
+            total +=  (decimal)line.Product.Price * line.Quantity;
+        }
+
+        if (order.Customer.IsVip)
+        {
+            total *= 0.90m;
+        }
+
+        return total;
+    }
 }

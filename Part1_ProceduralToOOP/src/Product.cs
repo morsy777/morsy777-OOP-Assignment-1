@@ -79,8 +79,6 @@ public class Product
         }
     }
     
-    // called in Order to decrease stock for specific product
-    // I use this method instead of make Stock property editable outside this class
     public bool TryDecreaseStock(int quantity)
     {
         if (quantity <= 0 || quantity > Stock)

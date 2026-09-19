@@ -1,10 +1,5 @@
 ﻿namespace Part1_ProceduralToOOP;
 
-// This Bad Comment but I wanna explain important thing.
-// The ctor is private & props is readonly
-// because I don't want outsiders create an object or add it to _customers
-// except through AddCustomer() to protect internal state adn data.
-
 public class Customer
 {
     private const int MaxCustomers  = 50;
@@ -18,7 +13,6 @@ public class Customer
     private static readonly List<Customer> Customers = new();
     public List<Order> Orders { get; private set; } = new();
     
-
     private Customer(int id, string name, string email, string city, bool isVip)
     {
         Id = id;
@@ -27,8 +21,6 @@ public class Customer
         City = city;
         IsVip = isVip;
     }
-    
-    // I Make all methods static because they aren't coupled to specific object
     
     public static void AddCustomer(int id, string name, string email, string city, bool isVip)
     {
@@ -80,11 +72,10 @@ public class Customer
                               $"- {customer.City} - Is Vip = {(customer.IsVip ? "yes" : "no")}");
         }
     }
-
-    public static int FindCustomerIndexById(int id)
-        => Customers.FindIndex(x => x.Id == id);
     
-    // I Studied linq, I add this to allow outsiders access props for specific obj
     public static Customer? FindCustomerById(int id)
      => Customers.Find(x => x.Id == id);
+    
+    private static int FindCustomerIndexById(int id)
+        => Customers.FindIndex(x => x.Id == id);
 }
